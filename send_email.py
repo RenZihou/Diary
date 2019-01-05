@@ -20,8 +20,8 @@ def send(password_: str, file_: str, note_=None) -> bool:
     :param note_: extra notification.
     :return: a bool value to show if sent successfully.
     """
-    sender_ = 'renzihou2012@163.com'
-    receiver_ = 'renzihou2012@163.com'
+    sender_ = 'username2@163.com'
+    receiver_ = 'username@163.com'
 
     content = 'Date: %s\nFile name: %s\nNote: %s' % (datetime.now(), file_, note_)
     text = MIMEText(content)
