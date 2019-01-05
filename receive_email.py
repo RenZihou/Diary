@@ -56,7 +56,7 @@ def decode_str(s: bytes) -> str:  # decode the header
 
 
 def receive(
-        password_: str, required_date_: str, host_: str = 'pop.163.com', user_: str = 'renzihou2012@163.com') -> list:
+        password_: str, required_date_: str, host_: str = 'pop.163.com', user_: str = 'username@163.com') -> list:
     """
     traversal the mails and download the attachments which are satisfied with requirement.
     :param host_: mail host
