@@ -174,7 +174,6 @@ class Diary(object):
                     return None
 
             for each in content.split('#d#'):  # separate different dates
-                print(each)
                 tmp = each.split('#t#')  # separate date and content
                 cls.dates.append(tmp[0])
                 cls.diaries.append(Diary(text=eval(tmp[1]), date=tmp[0]))  # import a new page
