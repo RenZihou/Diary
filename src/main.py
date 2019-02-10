@@ -5,6 +5,7 @@
 define the main function of project 'Diary'
 """
 
+from os import listdir
 from os.path import exists
 from configparser import ConfigParser  # read and write ini files
 from src.diary import Diary
@@ -88,8 +89,22 @@ def main():
         Import another diary book from local.
         :return: None
         """
-        Diary.load('files/' + input('Import your diary book (.dr): '))
-        return
+        _ = 1
+        diaries = []
+        for each in listdir('files'):
+            if each[-3:] == '.dr':  # is diary file
+                print('%d: %s' % (_, each))
+                diaries.append(each)
+                _ += 1
+
+        index = get_int('Import (input the #, if you want to create a new one, input 0): ', range_=range(_+1))
+        if index == 0:  # create a new book
+            filename = 'files/' + input('Name your new diary book (.dr): ')
+            Diary.change_file(filename).set_password(input('New password: ')).init()
+        else:  # import the selected one
+            new_password = input('Password for %s: ' % diaries[index-1])
+            Diary.load('files/' + diaries[index-1], password_=new_password)
+        return None
 
     def recall_():
         """
@@ -125,11 +140,11 @@ def main():
             '7. Import another book\n'
             '8. Set password\n'
             '9. Recall\n'
-            '0. Quit' % Diary.current_file[6:-3])
+            '0. Quit' % Diary.current_file.replace('files/', '').replace('.dr', ''))
         mode = get_int('#: ', range_=range(10))
         print('=' * 50)
 
-        funcs[mode]()  # call the functions defined in line 99
+        funcs[mode]()  # call the functions defined in line 118
         if quit_flag:  # quit the program
             return None
 

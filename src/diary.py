@@ -5,7 +5,6 @@
 define the Diary class which is the main part of the project 'Diary'
 """
 
-from os.path import exists
 from datetime import datetime
 from src.basicfunctions import get_int
 from src.encrypt_decrypt import des
@@ -19,7 +18,7 @@ class Diary(object):
     current_file = str()  # the encrypted diary book file
     dates = list()  # a sequence of the dates of all the diaries
     diaries = list()  # a sequence of all the diaries
-    __password = input('Set password: ')  # the password of the file
+    __password = '********'  # the password of the file
     saved = True  # a flag to represent if the file is saved
     des = des(__password)
     __slots__ = ('text', 'date')
@@ -93,7 +92,7 @@ class Diary(object):
     @classmethod
     def search(cls, keyword_: str):
         """
-        Search certain diaries according to a keyword
+        search certain diaries according to a keyword
         :param keyword_: The keyword
         :return: A selected diary
         """
@@ -128,7 +127,15 @@ class Diary(object):
         :return: cls
         """
         print('**** WARNING: THIS ACTION CANNOT UNDO ****\n==== Delete a Page ==== ')
-        cls.diaries.remove(cls.content())  # remove the Diary object from Diary.diaries
+        select = cls.content()  # remove the Diary object from Diary.diaries
+        if get_int('Delete one paragraph in it (0) or the whole page (1)? ', range_=(0, 1)):
+            cls.diaries.remove(select)  # delete the whole page
+        else:
+            # delete a single paragraph
+            select.view_page()
+            select.text.remove(
+                select.text[get_int('Choose a paragraph to delete: ', range_=range(len(select.text)))]
+            )
         print('==== Page Deleted ====')
         cls.saved = False  # flag
         return cls
@@ -139,6 +146,8 @@ class Diary(object):
         save your diary to files/filename.dr
         :return: cls
         """
+        cls.diaries = sorted(cls.diaries, key=lambda x: x.date.replace('-', ''))  # sort the diaries in time order
+
         if not cls.current_file:
             cls.current_file = input('Please name the file (ends in .dr): ')
 
@@ -151,46 +160,44 @@ class Diary(object):
         return cls
 
     @classmethod
-    def load(cls, file_: str):
+    def load(cls, file_: str, password_: str = __password):
         """
         Import another diary book from local file (which is encrypted). If the file does not exist, create one.
         :param file_: The encrypted file path, should look like: files/filename.dr
+        :param password_: The password for new diary book
         :return: cls
         """
-        if exists(file_):  # the file exists, then load it
-            print('==== Import a Diary ====')
-            if not cls.saved and input('Save the current file? <y/n> ') == 'y':
-                if not cls.current_file:  # then create a new diary book
-                    cls.current_file = input('Please name the current file (end in .dr): ')
-                cls.save()  # save the current file
-            cls.init()  # initiate the diaries list
+        print('==== Import a Diary ====')
+        if not cls.saved and input('Save the current file? <y/n> ') == 'y':
+            cls.save()  # save the current file
+        cls.init()  # initiate the diaries list
 
-            with open(file=file_, mode='rb') as f:
-                try:
-                    content = cls.des.decrypt(f.read()).decode()
-                except UnicodeDecodeError:  # some bytes cannot be converted to unicode
-                    print('**** Wrong Password ****')
-                    cls.current_file = 'files/Diary_Book_tmp.dr'  # turn to the temp diary book
-                    return None
+        cls.set_password(password_)
+        with open(file=file_, mode='rb') as f:
+            try:
+                content = cls.des.decrypt(f.read()).decode()
+            except UnicodeDecodeError:  # some bytes cannot be converted to unicode
+                print('**** Wrong Password ****')
+                cls.current_file = 'files/Diary_Book_tmp.dr'  # turn to the temp diary book
+                return None
 
-            for each in content.split('#d#'):  # separate different dates
-                tmp = each.split('#t#')  # separate date and content
-                cls.dates.append(tmp[0])
-                cls.diaries.append(Diary(text=eval(tmp[1]), date=tmp[0]))  # import a new page
+        for each in content.split('#d#'):  # separate different dates
+            tmp = each.split('#t#')  # separate date and content
+            cls.dates.append(tmp[0])
+            cls.diaries.append(Diary(text=eval(tmp[1]), date=tmp[0]))  # import a new page
 
-            print('==== Diary Imported ====')
-        else:  # the file does not exist, then create one
-            cls.change_file(file_).save().init()  # save the current one and initiate the diaries list.
         cls.current_file = file_
+        print('==== Diary Imported ====')
         return cls
 
     @classmethod
-    def set_password(cls):
+    def set_password(cls, p: str):
         """
         Set the password of the diary book.
+        :param p: new password
         :return: cls
         """
-        cls.__password = input('New password: ')  # set new password
+        cls.__password = p  # set new password
         cls.des = des(cls.__password)
         return cls
 
