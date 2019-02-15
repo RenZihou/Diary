@@ -121,7 +121,8 @@ def main():
 
     if exists('files/config.ini'):
         config.read('files/config.ini')
-        Diary.load(config['DEFAULT']['diary_book'])
+        file = config['DEFAULT']['diary_book']
+        Diary.load(file_=file, password_=input('Password for %s: ' % file.replace('files/', '').replace('.dr', '')))
     else:
         import_()
 
