@@ -1,4 +1,5 @@
 # Diary
+version 3.4.3
 
 This is a private book.
 Main functions defined in diary.py
