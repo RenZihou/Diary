@@ -1,6 +1,7 @@
+# !venv\Scripts python
 # -*- coding: utf-8 -*-
 # @Author: RZH
-# version 3.4.3  updated on 15, Feb, 2019
+# version 3.5.1  updated on 11, May, 2019
 
 """
 run the project 'Diary'

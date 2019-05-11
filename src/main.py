@@ -12,6 +12,7 @@ from src.diary import Diary
 from src.basicfunctions import get_int
 from src.send_email import send
 from src.receive_email import receive
+from plugin.input_pwd import input_pwd as in_pwd
 
 
 def main():
@@ -21,6 +22,12 @@ def main():
     """
     quit_flag = False
     config = ConfigParser()
+
+    def input_pwd(s, len_=0):
+        if hide_pwd:
+            return in_pwd(s=s, len_=len_)
+        else:
+            return input(s)
 
     def quit_():
         """
@@ -33,6 +40,7 @@ def main():
             Diary.save()
 
         config['DEFAULT']['diary_book'] = Diary.current_file
+        config['DEFAULT']['hide_pwd'] = str(hide_pwd)
         with open('files/config.ini', 'w') as cf:
             config.write(cf)  # write the configuration file, including the default diary book.
 
@@ -71,7 +79,7 @@ def main():
         """
         print('==== Synchronize ====')
         Diary.save()  # save the file
-        key = input('Please input your authorization code: ')  # login your email
+        key = input_pwd('Please input your authorization code: ')  # login your email
         if get_int('Choose mode:\n1. Sync to the mailbox\n2. Sync from the mailbox\n#: ', range_=(1, 2)) == 1:
             send(key, Diary.current_file, note_='Diary_Sync')  # send the current file to your mailbox
         else:
@@ -100,9 +108,9 @@ def main():
         index = get_int('Import (input the #, if you want to create a new one, input 0): ', range_=range(_+1))
         if index == 0:  # create a new book
             filename = 'files/' + input('Name your new diary book (.dr): ')
-            Diary.change_file(filename).set_password(input('New password: ')).init()
+            Diary.change_file(filename).set_password(input_pwd('New password: ', len_=8)).init()
         else:  # import the selected one
-            new_password = input('Password for %s: ' % diaries[index-1])
+            new_password = input_pwd('Password for %s: ' % diaries[index-1], len_=8)
             Diary.load('files/' + diaries[index-1], password_=new_password)
         return None
 
@@ -115,14 +123,35 @@ def main():
         Diary.recall([each.strip() for each in keywords.split(',')])
         return None
 
+    def settings_():
+        """
+        Settings for the diary book.
+        Including:
+        * whether hide the password while typing it.
+        :return: None
+        """
+        nonlocal hide_pwd
+        index = get_int(
+            'Settings:\n'
+            '1. Password typing\n'
+            '0. Quit\n'
+            '#: ', range_=(0, 1)
+        )
+        if index == 1:
+            hide_pwd = True if get_int('Whether hide password while typing (0 or 1): ', range_=(0, 1)) else False
+        return None
+
     funcs = [
         quit_, Diary.new_page, view_, Diary.del_page, edit_,
-        Diary.save, sync_, import_, Diary.set_password, recall_]  # functions to execute later
+        Diary.save, sync_, import_, Diary.set_password, recall_, settings_]  # functions to execute later
 
     if exists('files/config.ini'):
         config.read('files/config.ini')
         file = config['DEFAULT']['diary_book']
-        Diary.load(file_=file, password_=input('Password for %s: ' % file.replace('files/', '').replace('.dr', '')))
+        hide_pwd = eval(config['DEFAULT']['hide_pwd'])
+        Diary.load(
+            file_=file,
+            password_=input_pwd('Password for %s: ' % file.replace('files/', '').replace('.dr', ''), len_=8))
     else:
         import_()
 
@@ -141,11 +170,12 @@ def main():
             '7. Import another book\n'
             '8. Set password\n'
             '9. Recall\n'
+            '10. Settings\n'
             '0. Quit' % Diary.current_file.replace('files/', '').replace('.dr', ''))
-        mode = get_int('#: ', range_=range(10))
+        mode = get_int('#: ', range_=range(11))
         print('=' * 50)
 
-        funcs[mode]()  # call the functions defined in line 118
+        funcs[mode]()  # call the functions defined in line 144
         if quit_flag:  # quit the program
             return None
 

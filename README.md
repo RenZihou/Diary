@@ -10,3 +10,11 @@ What you can do with this program:
 * 4, make a recall from your diaries
 
 By Ren ZiHou, 5, Jan, 2019
+
+***
+
+## 更新：
+
+* 2019-5-11 3.5.1
+
+	支持密码隐藏的输入（在命令行中可以正常运行，但是由于在PyCharm中运行会出bug（认为是PyCharm运行的问题），支持在settings中选择是否开启这一功能）
