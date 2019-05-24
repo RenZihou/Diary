@@ -17,7 +17,7 @@ from plugin.input_pwd import input_pwd as in_pwd
 
 def main():
     """
-    help the user to call different functions in the class 'Matter'
+    help the user to call different functions in the class 'Diary'
     :return: None
     """
     quit_flag = False
