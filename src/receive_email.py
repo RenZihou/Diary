@@ -43,12 +43,13 @@ class Mails(object):
 mails = []
 
 
-def decode_str(s: bytes) -> str:  # decode the header
+def decode_str(s) -> str:  # decode the header
     """
     decode the binary code from internet to utf-8 which can be recognized.
     :param s: the binary string
     :return: the utf-8 string
     """
+    print(type(s))
     value, charset = decode_header(s)[0]
     if charset:
         value = value.decode(charset)
@@ -56,13 +57,17 @@ def decode_str(s: bytes) -> str:  # decode the header
 
 
 def receive(
-        password_: str, required_date_: str, host_: str = 'pop.163.com', user_: str = 'renzihou2012@163.com') -> list:
+        password_: str, required_date_: str,
+        host_: str = 'pop.163.com', user_: str = ''  TODO: finish your own info.
+) -> list:
     """
-    traversal the mails and download the attachments which are satisfied with requirement.
+    traversal the mails and download the attachments
+    which are satisfied with requirement.
     :param host_: mail host
     :param user_: user
     :param password_: the authorization code
-    :param required_date_: In form of 'yy-mm-dd-hh-mm'. only receive the mails later than this date
+    :param required_date_: In form of 'yy-mm-dd-hh-mm'.
+    only receive the mails later than this date
     :return: a list of objects
     """
     # login
@@ -78,16 +83,23 @@ def receive(
         # traversal each mail
         for i in range(num, 0, -1):
             lines = pop_conn.retr(i)[1]
-            msg_content = b'\r\n'.join(lines).decode('utf-8')  # the original content of the mail
-            r_date = lines[20].decode('utf-8')[6:]  # line 20 is the beginning of the content which is the receive date.
-            name = lines[21].decode('utf-8')[11:]  # line 21 is the name of the attachment.
-            note = lines[22].decode('utf-8')[6:]  # line 22 is the name of the attachment.
+            msg_content = b'\r\n'.join(lines).decode('utf-8')
+            # the original content of the mail
+            r_date = lines[20].decode('utf-8')[6:]
+            # line 20: the beginning of the content which is the receive date.
+            name = lines[21].decode('utf-8')[11:]
+            # line 21: the name of the attachment.
+            note = lines[22].decode('utf-8')[6:]
+            # line 22: the name of the attachment.
             msg = Parser().parsestr(msg_content)  # the mail
 
-            receive_date = datetime.strptime(msg.get("Date")[5:21], '%d %b %Y %H:%M')
+            receive_date = datetime.strptime(
+                msg.get("Date")[5:21], '%d %b %Y %H:%M'
+            )
             date_ = datetime.strptime(required_date_, '%Y-%m-%d-%H-%M')
             if receive_date < date_:
-                break  # stop if the receive date is earlier than the required date.
+                # stop when the receive date is earlier than the required date.
+                break
 
             subject = decode_str(msg.get('subject', ''))
             if subject == 'Synchronize':
@@ -95,12 +107,15 @@ def receive(
                     filename = part.get_filename()  # get attachments
                     if filename:  # attachment exists
                         data = part.get_payload(decode=True)
-                        mails.append(Mails(name_=name, r_date_=r_date, data_=data, note_=note))
+                        mails.append(Mails(
+                            name_=name, r_date_=r_date, data_=data, note_=note
+                        ))
 
         pop_conn.quit()
-
     return mails
 
 
 if __name__ == '__main__':
-    print(receive(password_=input('authorization code: '), required_date_='2018-10-1-0-0'))
+    print(receive(
+        password_=input('authorization code: '), required_date_='2020-1-1-0-0'
+    ))

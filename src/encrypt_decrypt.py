@@ -9,4 +9,7 @@ import pyDes
 
 
 def des(key):
-    return pyDes.des(key, pyDes.CBC, '********', pad=None, padmode=pyDes.PAD_PKCS5)
+    return pyDes.des(
+        key, pyDes.CBC, '********',
+        pad=None, padmode=pyDes.PAD_PKCS5
+    )

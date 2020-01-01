@@ -54,7 +54,8 @@ class Diary(object):
         print('The previous one: ')
         self.view_page()  # print the previous page.
         print('Choose one paragraph to edit: ')
-        index_ = get_int('#: ', range_=range(len(self.text)))  # the paragraph to edit
+        index_ = get_int('#: ', range_=range(len(self.text)))
+        # the paragraph to edit
         self.text[index_] = input('New text: ')  # update the paragraph
         print('==== Paragraph Edited ====')
         return self
@@ -70,7 +71,8 @@ class Diary(object):
         new_date = str(datetime.now()).split(' ')[0] \
             if new_date.lower() == 'today' else new_date
         new_text = [input('Please input the content: ')]
-        if new_date in cls.dates:  # already has a same-date page, then add a paragraph to this page
+        if new_date in cls.dates:
+            # already has a same-date page, then add a paragraph to this page
             cls.diaries[cls.dates.index(new_date)].text += new_text
         else:  # create a new page
             cls.dates.append(new_date)
@@ -86,8 +88,12 @@ class Diary(object):
         :return: The selected Diary object
         """
         for index, each in enumerate(cls.diaries):
-            print('%d: %s\t%s......' % (index, each.date, each.text[0][:10]))  # print the abstract
-        return cls.diaries[get_int('Choose one page of diary: ', range_=range(len(cls.diaries)))]  # select a page
+            print('%d: %s\t%s......' % (index, each.date, each.text[0][:10]))
+            # print the abstract
+        return cls.diaries[get_int(
+            'Choose one page of diary: ',
+            range_=range(len(cls.diaries))
+        )]  # select a page
 
     @classmethod
     def search(cls, keyword_: str):
@@ -101,7 +107,8 @@ class Diary(object):
             if keyword_ in ''.join(each.text):  # keyword in content
                 target.append(each)  # wait fot select
         for index, each in enumerate(target):  # print all the results
-            print('%d: %s\t%s......' % (index, each.date, each.text[0][:10]))  # print the abstract
+            print('%d: %s\t%s......' % (index, each.date, each.text[0][:10]))
+            # print the abstract
         return target[get_int(
             'Choose one page of diary: ', range_=range(len(target))
             )] if len(target) > 0 else cls.diaries[0]  # select one page
@@ -126,15 +133,22 @@ class Diary(object):
         delete a record.
         :return: cls
         """
-        print('**** WARNING: THIS ACTION CANNOT UNDO ****\n==== Delete a Page ==== ')
+        print('**** WARNING: THIS ACTION CANNOT UNDO ****\n'
+              '==== Delete a Page ==== ')
         select = cls.content()  # remove the Diary object from Diary.diaries
-        if get_int('Delete one paragraph in it (0) or the whole page (1)? ', range_=(0, 1)):
+        if get_int(
+                'Delete one paragraph in it (0) or the whole page (1)? ',
+                range_=(0, 1)
+        ):
             cls.diaries.remove(select)  # delete the whole page
         else:
             # delete a single paragraph
             select.view_page()
             select.text.remove(
-                select.text[get_int('Choose a paragraph to delete: ', range_=range(len(select.text)))]
+                select.text[get_int(
+                    'Choose a paragraph to delete: ',
+                    range_=range(len(select.text))
+                )]
             )
         print('==== Page Deleted ====')
         cls.saved = False  # flag
@@ -146,12 +160,16 @@ class Diary(object):
         save your diary to files/filename.dr
         :return: cls
         """
-        cls.diaries = sorted(cls.diaries, key=lambda x: x.date.replace('-', ''))  # sort the diaries in time order
+        cls.diaries = sorted(
+            cls.diaries, key=lambda x: x.date.replace('-', '')
+        )  # sort the diaries in time order
 
         if not cls.current_file:
             cls.current_file = input('Please name the file (ends in .dr): ')
 
-        content = '#d#'.join(['%s#t#%s' % (each.date, str(each.text)) for each in cls.diaries])
+        content = '#d#'.join(
+            ['%s#t#%s' % (each.date, str(each.text)) for each in cls.diaries]
+        )
         with open(file=cls.current_file, mode='wb') as f:
             f.write(cls.des.encrypt(content.encode('utf-8')))
 
@@ -162,8 +180,10 @@ class Diary(object):
     @classmethod
     def load(cls, file_: str, password_: str = __password):
         """
-        Import another diary book from local file (which is encrypted). If the file does not exist, create one.
-        :param file_: The encrypted file path, should look like: files/filename.dr
+        Import another diary book from local file (which is encrypted).
+        If the file does not exist, create one.
+        :param file_: The encrypted file path,
+        should look like: files/filename.dr
         :param password_: The password for new diary book
         :return: cls
         """
@@ -176,15 +196,18 @@ class Diary(object):
         with open(file=file_, mode='rb') as f:
             try:
                 content = cls.des.decrypt(f.read()).decode()
-            except UnicodeDecodeError:  # some bytes cannot be converted to unicode
+            except UnicodeDecodeError:
+                # some bytes cannot be converted to unicode
                 print('**** Wrong Password ****')
-                cls.current_file = 'files/Diary_Book_tmp.dr'  # turn to the temp diary book
+                cls.current_file = 'files/Diary_Book_tmp.dr'
+                # turn to the temp diary book
                 return None
 
         for each in content.split('#d#'):  # separate different dates
             tmp = each.split('#t#')  # separate date and content
             cls.dates.append(tmp[0])
-            cls.diaries.append(Diary(text=eval(tmp[1]), date=tmp[0]))  # import a new page
+            cls.diaries.append(Diary(text=eval(tmp[1]), date=tmp[0]))
+            # import a new page
 
         cls.current_file = file_
         print('==== Diary Imported ====')
@@ -224,7 +247,8 @@ class Diary(object):
     @classmethod
     def num_of_pages(cls) -> int:
         """
-        return the number of pages, used to refuse view request when there are no diaries
+        return the number of pages, used to refuse view request
+        when there are no diaries
         :return: the number of pages
         """
         return len(cls.diaries)
