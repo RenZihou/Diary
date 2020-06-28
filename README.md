@@ -11,10 +11,14 @@ What you can do with this program:
 
 By Ren ZiHou, 5, Jan, 2019
 
+## Requirements
+
+pyDes >= `2.0.1`
+
 ***
 
 ## 更新：
 
 * 2019-5-11 3.5.1
 
-	支持密码隐藏的输入（在命令行中可以正常运行，但是由于在 PyCharm 中运行会出 bug，支持在 settings 中选择是否开启这一功能）
+  支持密码隐藏的输入（在命令行中可以正常运行，但是由于在 PyCharm 中运行会出 bug，支持在 settings 中选择是否开启这一功能）
